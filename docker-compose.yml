@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/ussd_db
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - ussd-network
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ussd_db
+      MYSQL_USER: ussd_user
+      MYSQL_PASSWORD: ussd_password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - ussd-network
+
+  redis:
+    image: redis:7.0
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ussd-network
+
+networks:
+  ussd-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
